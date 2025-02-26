@@ -5,39 +5,67 @@ import TodoList from "./Components/Todo-list.jsx";
 import './App.css'
 import {Component} from "react";
 
-export default class App extends Component {
+export default class App extends Component {                      //единственный класс, где хранятся все функции
 
-    state = {
-        todoData: [
-            {label: 'Drink Coffee', important: false, id: 1},
-            {label: 'Make Awesome App', important: true, id: 2},
-            {label: 'Have a lunch', important: false, id: 3},
+    state = {                      //Список дел и состояние. По умолчанию 'не выполнено'
+        items: [
+            {id: 1, label: 'Drink Coffee', done: false },
+            {id: 2, label: 'Make Awesome App', done: false },
+            {id: 3, label: 'Have a lunch', done: false },
         ]
     };
 
-    deleteItem = (id) => {
-        console.log(id);
-        // this.setState(({todoData}) => {
-        //     const idx = todoData.items.findIndex((item) => item.id === id);
-        //     todoData.splice(idx, 1)
-            // const before = todoData.slice(0, idx)
-            // const after = todoData.slice(idx, +1)
-            //
-            // const newArr = [...before, ...after];
-        //     return {
-        //         todoData: todoData  };
-        // })
+    toggleProperty = (arr, id, propName) => {
+        const idx = arr.findIndex((item) => item.id === id)
+        const oldItem = arr[idx]
+        const value = !oldItem[propName]
+
+        const item = {...arr[idx], [propName] : value}
+
+        return [
+            ...arr.slice(0, idx),
+            item,
+            ...arr.slice(idx + 1)
+        ]
     }
+
+    onDelete = (id) => {
+        this.setState((state) => {
+            const idx = state.items.findIndex((item) => item.id === id)
+            const items = [
+                ...state.items.slice(0, idx),
+                ...state.items.slice(idx + 1)
+            ]
+
+            return {items}
+        })
+    }
+
+    onToggleDone = (id) => {                                    //Зачеркивание элемента
+        this.setState((state) => {
+            const items = this.toggleProperty(state.items, id, 'done')
+            return {items}
+        });
+    };
 
 
     render() {
+        const { items } = this.state;
+        const doneCount = items.filter((item) => item.done).length
+        const toDoCount = items.length - doneCount
         return (
             <section className="todoapp">
                 <Header/>
                 <section className="main">
-                    <TodoList todos={this.state.todoData}
-                              onDeleted ={this.deleteItem}></TodoList>
-                    <Footer></Footer>
+                    <TodoList
+                        onDelete={this.onDelete}
+                        onToggleDone={this.onToggleDone}
+                        items={items}//передаём зачеркивание текста
+                    ></TodoList>
+                    <Footer
+                        toDo={toDoCount}
+                    >
+                    </Footer>
                 </section>
             </section>
         )
