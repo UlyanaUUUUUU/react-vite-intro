@@ -5,14 +5,17 @@ import TodoList from "./Components/Todo-list.jsx";
 import './App.css'
 import {Component} from "react";
 
-export default class App extends Component {                      //единственный класс, где хранятся все функции
+export default class App extends Component {
+
+    maxId = 100
 
     state = {                      //Список дел и состояние. По умолчанию 'не выполнено'
         items: [
-            {id: 1, label: 'Drink Coffee', done: false },
-            {id: 2, label: 'Make Awesome App', done: false },
-            {id: 3, label: 'Have a lunch', done: false },
-        ]
+            {id: 1, label: 'All', done: false, isEdit : false},
+            {id: 2, label: 'People', done: false, isEdit : false},
+            {id: 3, label: 'Listen Me', done: false, isEdit : false},
+        ],
+        filter: 'all'
     };
 
     toggleProperty = (arr, id, propName) => {
@@ -20,7 +23,7 @@ export default class App extends Component {                      //единст
         const oldItem = arr[idx]
         const value = !oldItem[propName]
 
-        const item = {...arr[idx], [propName] : value}
+        const item = {...arr[idx], [propName]: value}
 
         return [
             ...arr.slice(0, idx),
@@ -28,6 +31,7 @@ export default class App extends Component {                      //единст
             ...arr.slice(idx + 1)
         ]
     }
+
 
     onDelete = (id) => {
         this.setState((state) => {
@@ -41,6 +45,47 @@ export default class App extends Component {                      //единст
         })
     }
 
+    onEdit = (id, newLabel) => {
+        this.setState((state) => {
+            const idx = state.items.findIndex((item) => item.id === id)
+            const updatedItem = {...state.items[idx], label: newLabel}
+            const items = [
+                ...state.items.slice(0, idx),
+                updatedItem,
+                ...state.items.slice(idx + 1)
+            ]
+            return {items}
+        })
+    }
+
+    onCreate = (text) => {
+        const newItem = {
+            id: this.maxId++,
+            label: text,
+            done: false
+        }
+
+        this.setState((state) => {
+            const newArr = [
+                ...state.items,
+                newItem,
+            ]
+            return {
+                items: newArr
+            }
+        })
+
+    }
+
+    clearCompleted = () => {
+        this.setState((state) => {
+                const items = state.items.filter((item) => !item.done)
+                return {items}
+        })
+    }
+
+
+
     onToggleDone = (id) => {                                    //Зачеркивание элемента
         this.setState((state) => {
             const items = this.toggleProperty(state.items, id, 'done')
@@ -48,22 +93,49 @@ export default class App extends Component {                      //единст
         });
     };
 
+    filter(items, filter) {
+        switch (filter) {
+            case 'all':
+                return items;
+            case 'active':
+                return items.filter((item) => !item.done)
+            case 'completed':
+                return items.filter((item) => item.done)
+            default:
+                return items
+        }
+    }
+
+    onFilterChange = (filter) => {
+        this.setState({ filter })
+    }
+
+
+
 
     render() {
-        const { items } = this.state;
+        const {items, filter} = this.state;
+        const visibleItems = this.filter(items, filter);
         const doneCount = items.filter((item) => item.done).length
         const toDoCount = items.length - doneCount
         return (
             <section className="todoapp">
-                <Header/>
+                <Header
+                    onCreate = {this.onCreate}
+                >
+                </Header>
                 <section className="main">
                     <TodoList
                         onDelete={this.onDelete}
                         onToggleDone={this.onToggleDone}
-                        items={items}//передаём зачеркивание текста
+                        items={visibleItems}//передаём зачеркивание текста
+                        onEdit={this.onEdit}
                     ></TodoList>
                     <Footer
                         toDo={toDoCount}
+                        filter = {filter}
+                        onFilterChange = {this.onFilterChange}
+                        clearCompleted = {this.clearCompleted}
                     >
                     </Footer>
                 </section>
