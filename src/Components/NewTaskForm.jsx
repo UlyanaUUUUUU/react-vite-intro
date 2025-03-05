@@ -6,7 +6,7 @@ export default class NewTaskForm extends Component {
     state = {
         label: ''
     }
-    onLabelChange  = (e) => {
+    onLabelChange = (e) => {
         this.setState({
             label: e.target.value
         })
@@ -20,7 +20,7 @@ export default class NewTaskForm extends Component {
 
     render() {
         return (
-            <form onSubmit = {this.onSubmit}>
+            <form onSubmit={this.onSubmit}>
                 <input
                     className="new-todo"
                     placeholder="What needs to be done?"

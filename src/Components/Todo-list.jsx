@@ -2,7 +2,7 @@ import TodoListItem from './Todo-list-item.jsx'
 import './Todo-list.css'
 import {useState} from "react";
 
-export default function TodoList ({ items, onToggleDone, onDelete, onEdit})  {
+export default function TodoList ({ items, onToggleDone, onDelete, onEdit, })  {
 
     const [editingId, setEditingId] = useState(null)
     const [newLabel, setNewLabel] = useState('')

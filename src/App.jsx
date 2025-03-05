@@ -9,11 +9,9 @@ export default class App extends Component {
 
     maxId = 100
 
-    state = {                      //Список дел и состояние. По умолчанию 'не выполнено'
+    state = {
         items: [
-            {id: 1, label: 'All', done: false, isEdit : false},
-            {id: 2, label: 'People', done: false, isEdit : false},
-            {id: 3, label: 'Listen Me', done: false, isEdit : false},
+
         ],
         filter: 'all'
     };
@@ -59,10 +57,12 @@ export default class App extends Component {
     }
 
     onCreate = (text) => {
+
         const newItem = {
             id: this.maxId++,
             label: text,
-            done: false
+            done: false,
+            toDoDate: new Date()
         }
 
         this.setState((state) => {
@@ -86,7 +86,7 @@ export default class App extends Component {
 
 
 
-    onToggleDone = (id) => {                                    //Зачеркивание элемента
+    onToggleDone = (id) => {
         this.setState((state) => {
             const items = this.toggleProperty(state.items, id, 'done')
             return {items}
@@ -128,8 +128,9 @@ export default class App extends Component {
                     <TodoList
                         onDelete={this.onDelete}
                         onToggleDone={this.onToggleDone}
-                        items={visibleItems}//передаём зачеркивание текста
+                        items={visibleItems}
                         onEdit={this.onEdit}
+
                     ></TodoList>
                     <Footer
                         toDo={toDoCount}

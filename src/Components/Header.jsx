@@ -6,7 +6,7 @@ export default function Header({onCreate}) {
         <header className="header">
             <h1>todos</h1>
             <NewTaskForm
-                onCreate = {onCreate}
+                onCreate={onCreate}
             />
         </header>
     )
