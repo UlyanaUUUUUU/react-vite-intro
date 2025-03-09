@@ -1,6 +1,6 @@
 import Header from './components/Header';
 import Footer from './components/Footer';
-import TodoList from './Components/Todo-list.jsx';
+import TaskList from './Components/TaskList.jsx';
 
 import './App.css';
 import { Component } from 'react';
@@ -97,12 +97,12 @@ export default class App extends Component {
       <section className="todoapp">
         <Header onCreate={this.onCreate}></Header>
         <section className="main">
-          <TodoList
+          <TaskList
             onDelete={this.onDelete}
             onToggleDone={this.onToggleDone}
             items={visibleItems}
             onEdit={this.onEdit}
-          ></TodoList>
+          ></TaskList>
           <Footer
             toDo={toDoCount}
             filter={filter}

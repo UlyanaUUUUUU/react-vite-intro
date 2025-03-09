@@ -1,17 +1,17 @@
-import TodoListItem from './Todo-list-item.jsx';
-import './Todo-list.css';
+import Task from './Task.jsx';
+import './TaskList.css';
 import { useState } from 'react';
 import propTypes from 'prop-types';
 
-export default function TodoList({ items, onToggleDone, onDelete, onEdit }) {
-  TodoList.defaultProps = {
+export default function TaskList({ items, onToggleDone, onDelete, onEdit }) {
+  TaskList.defaultProps = {
     items: () => {},
     onToggleDone: () => {},
     onDelete: () => {},
     onEdit: () => {},
   };
 
-  TodoList.propTypes = {
+  TaskList.propTypes = {
     items: propTypes.object,
     onToggleDone: propTypes.func,
     onDelete: propTypes.func,
@@ -69,7 +69,7 @@ export default function TodoList({ items, onToggleDone, onDelete, onEdit }) {
             />
           </>
         ) : (
-          <TodoListItem
+          <Task
             {...itemProps}
             onToggleDone={() => onToggleDone(id)}
             onDelete={() => onDelete(id)}

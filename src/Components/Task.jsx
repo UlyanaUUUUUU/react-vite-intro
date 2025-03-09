@@ -1,10 +1,10 @@
-import './Todo-list-item.css';
+import './Task.css';
 import { useEffect, useState } from 'react';
 import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import propTypes from 'prop-types';
 
-export default function TodoListItem({ label, toDoDate, onDelete, onToggleDone, done, onEdit }) {
-  TodoListItem.defaultProps = {
+export default function Task({ label, toDoDate, onDelete, onToggleDone, done, onEdit }) {
+  Task.defaultProps = {
     label: '',
     toDoDate: () => {},
     onDelete: () => {},
@@ -13,7 +13,7 @@ export default function TodoListItem({ label, toDoDate, onDelete, onToggleDone, 
     onEdit: () => {},
   };
 
-  TodoListItem.propTypes = {
+  Task.propTypes = {
     label: propTypes.string,
     toDoDate: propTypes.object,
     onDelete: propTypes.func,
