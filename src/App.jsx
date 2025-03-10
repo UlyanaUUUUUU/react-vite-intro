@@ -95,7 +95,7 @@ export default class App extends Component {
     const toDoCount = items.length - doneCount;
     return (
       <section className="todoapp">
-        <Header onCreate={this.onCreate}></Header>
+        <Header onCreate={this.onCreate}/>
         <section className="main">
           <TaskList
             onDelete={this.onDelete}
