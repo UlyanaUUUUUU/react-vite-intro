@@ -13,9 +13,12 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@vueuse/components": "^13.0.0",
+    "@vueuse/core": "^13.0.0",
     "date-fns": "^4.1.0",
     "prop-types": "^15.8.1",
     "react": "^19.0.0",
+    "react-countdown": "^2.3.6",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {

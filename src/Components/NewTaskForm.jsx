@@ -1,34 +1,80 @@
 import './NewTaskForm.css';
 import { Component } from 'react';
-import propTypes from 'prop-types';
 
 export default class NewTaskForm extends Component {
-  state = {
-    label: '',
-  };
 
-  onLabelChange = (e) => {
+  constructor(props) {
+    super(props);
+    this.state = {
+      label: '',
+      minutes: '',
+      seconds: '',
+    };
+
+
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleKeyDown = this.handleKeyDown.bind(this);
+  }
+
+  handleChange = (e) => {
     this.setState({
-      label: e.target.value,
+      [e.target.name]: e.target.value,
     });
   };
 
-  onSubmit = (e) => {
+  handleKeyDown(e) {
+    if (e.key === 'Enter') {
+      this.handleSubmit(e);
+    }
+  }
+
+  handleSubmit(e) {
     e.preventDefault();
-    this.props.onCreate(this.state.label);
-    this.setState({ label: '' });
-  };
+    const { label, minutes, seconds } = this.state;
+
+    if (!label.trim() && !minutes && !seconds) return;
+
+    const totalMs = (parseInt(minutes || 0) * 60000 + (parseInt(seconds || 0) * 1000));
+    this.props.onCreate(label, totalMs);
+    this.setState({ label: '', minutes: '', seconds: '' });
+  }
 
   render() {
     return (
-      <form onSubmit={this.onSubmit}>
+      <form
+        className="new-todo-form"
+        onSubmit={this.handleSubmit}
+      >
         <input
           className="new-todo"
+          name="label"
           placeholder="What needs to be done?"
           type="text"
-          onChange={this.onLabelChange}
+          onChange={this.handleChange}
+          onKeyDown={this.handleKeyDown}
           value={this.state.label}
           autoFocus
+        />
+        <input
+          className="new-todo-form__timer"
+          name="minutes"
+          placeholder="Min"
+          type="number"
+          min="0"
+          onChange={this.handleChange}
+          onKeyDown={this.handleKeyDown}
+          value={this.state.minutes}
+        />
+        <input
+          className="new-todo-form__timer"
+          name="seconds"
+          placeholder="Sec"
+          type="number"
+          min="0"
+          max="59"
+          onChange={this.handleChange}
+          onKeyDown={this.handleKeyDown}
+          value={this.state.seconds}
         />
       </form>
     );
@@ -36,9 +82,7 @@ export default class NewTaskForm extends Component {
 }
 
 NewTaskForm.defaultProps = {
-  onCreate: () => {},
+  onCreate: () => {
+  },
 };
 
-NewTaskForm.propTypes = {
-  onCreate: propTypes.func,
-};

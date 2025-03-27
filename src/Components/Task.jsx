@@ -1,16 +1,35 @@
 import './Task.css';
-import { useEffect, useState } from 'react';
-import formatDistanceToNow from 'date-fns/formatDistanceToNow';
 import propTypes from 'prop-types';
 
-export default function Task({ label, toDoDate, onDelete, onToggleDone, done, onEdit }) {
+export default function Task({
+                               label,
+                               onDelete,
+                               onToggleDone,
+                               done,
+                               onEdit,
+                               timeAgo,
+                               id,
+                               timerDuration,
+                               onToggleTimer,
+                               activeTimers,
+                             }) {
   Task.defaultProps = {
     label: '',
-    toDoDate: () => {},
-    onDelete: () => {},
-    onToggleDone: () => {},
+    toDoDate: () => {
+    },
+    onDelete: () => {
+    },
+    onToggleDone: () => {
+    },
     done: false,
-    onEdit: () => {},
+    onEdit: () => {
+    },
+    timeAgo: '',
+    id: null,
+    timerDuration: null,
+    onToggleTimer: () => {
+    },
+    activeTimers: {},
   };
 
   Task.propTypes = {
@@ -20,27 +39,39 @@ export default function Task({ label, toDoDate, onDelete, onToggleDone, done, on
     onToggleDone: propTypes.func,
     done: propTypes.func,
     onEdit: propTypes.func,
+    timeAgo: propTypes.string,
+    id: propTypes.number,
+    timerDuration: propTypes.number,
+    onToggleTimer: propTypes.func,
+    activeTimers: propTypes.object,
   };
-  const [timeAgo, setTimeAgo] = useState(formatDistanceToNow(new Date()));
 
-  const date = toDoDate ? new Date(toDoDate) : null;
+  const timer = activeTimers?.[id];
+  const showTimer = timerDuration > 0;
 
-  useEffect(() => {
-    if (!date) return;
-
-    const interval = setInterval(() => {
-      setTimeAgo(formatDistanceToNow(date));
-    }, 60000);
-
-    return () => clearInterval(interval);
-  }, [date]);
+  const formatTime = (ms) => {
+    if (isNaN(ms)) return '00:00';
+    const minutes = Math.floor(ms / 60000);
+    const seconds = Math.floor((ms % 60000) / 1000);
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
+  const formattedTime = timer ? formatTime(timer.remainingMs) : formatTime(timerDuration);
 
   return (
     <div className="view">
       <input className="toggle" type="checkbox" checked={done} onChange={onToggleDone} />
       <label>
-        <span className="description">{label}</span>
-        <span className="created">{timeAgo}</span>
+        <span className="title">{label}</span>
+        {showTimer && (
+          <span className="description">
+            <button
+              className={`icon icon-${timer?.isPaused ? 'play' : 'pause'}`}
+              onClick={() => onToggleTimer(id)}
+            />
+            {formattedTime}
+          </span>
+        )}
+        <span className="description">{timeAgo}</span>
       </label>
       <button className="icon icon-edit" onClick={onEdit}></button>
       <button className="icon icon-destroy" onClick={onDelete}></button>

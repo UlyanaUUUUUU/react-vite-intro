@@ -4,7 +4,8 @@ import propTypes from 'prop-types';
 
 export default function Header({ onCreate }) {
   Header.defaultProps = {
-    onCreate: () => {},
+    onCreate: () => {
+    },
   };
 
   Header.propTypes = {

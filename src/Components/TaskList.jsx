@@ -3,20 +3,31 @@ import './TaskList.css';
 import { useState } from 'react';
 import propTypes from 'prop-types';
 
-export default function TaskList({ items, onToggleDone, onDelete, onEdit }) {
+export default function TaskList({ items, onToggleDone, onDelete, onEdit, timeAgo, activeTimers, onToggleTimer }) {
   TaskList.defaultProps = {
-    items: () => {},
-    onToggleDone: () => {},
-    onDelete: () => {},
-    onEdit: () => {},
+    items: () => {
+    },
+    onToggleDone: () => {
+    },
+    onDelete: () => {
+    },
+    onEdit: () => {
+    },
+    timeAgo: '',
+    onToggleTimer: () => {
+    },
+    activeTimers: {},
   };
-
   TaskList.propTypes = {
     items: propTypes.object,
     onToggleDone: propTypes.func,
     onDelete: propTypes.func,
     onEdit: propTypes.func,
+    timeAgo: propTypes.string,
+    onToggleTimer: propTypes.func,
+    activeTimers: propTypes.object,
   };
+
 
   const [editingId, setEditingId] = useState(null);
   const [newLabel, setNewLabel] = useState('');
@@ -42,6 +53,7 @@ export default function TaskList({ items, onToggleDone, onDelete, onEdit }) {
       setEditingId(null);
     }
   };
+
 
   const elements = items.map((item) => {
     const { id, ...itemProps } = item;
@@ -74,6 +86,12 @@ export default function TaskList({ items, onToggleDone, onDelete, onEdit }) {
             onToggleDone={() => onToggleDone(id)}
             onDelete={() => onDelete(id)}
             onEdit={() => editLabel(id, item.label)}
+            timeAgo={timeAgo[id]}
+            id={id}
+            key={id}
+            timerDuration={item.timerDuration}
+            activeTimers={activeTimers}
+            onToggleTimer={onToggleTimer}
           />
         )}
       </li>

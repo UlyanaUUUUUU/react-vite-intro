@@ -5,9 +5,12 @@ import propTypes from 'prop-types';
 export default function Footer({ toDo, onFilterChange, filter, clearCompleted }) {
   Footer.defaultProps = {
     toDo: 0,
-    onFilterChange: () => {},
-    filter: () => {},
-    clearCompleted: () => {},
+    onFilterChange: () => {
+    },
+    filter: () => {
+    },
+    clearCompleted: () => {
+    },
   };
 
   Footer.propTypes = {

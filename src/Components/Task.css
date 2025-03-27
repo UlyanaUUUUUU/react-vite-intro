@@ -1,19 +1,107 @@
 button {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  background: none;
-  font-size: 100%;
-  vertical-align: baseline;
-  font-family: inherit;
-  font-weight: inherit;
-  color: inherit;
-  -webkit-appearance: none;
-  appearance: none;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    font-size: 100%;
+    vertical-align: baseline;
+    font-family: inherit;
+    font-weight: inherit;
+    color: inherit;
+    -webkit-appearance: none;
+    appearance: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 button::-moz-focus-inner {
-  border: none;
+    border: none;
+}
+
+.todo-list li .icon {
+    width: 30px;
+    height: 40px;
+    font-size: 34px;
+    color: #cc9a9a;
+    margin: auto 0;
+    transition: color 0.2s ease-out;
+    cursor: pointer;
+}
+
+.todo-list li .icon:hover {
+    color: #af5b5e;
+}
+
+.todo-list li .icon-destroy {
+    position: absolute;
+    top: 0;
+    bottom: -3px;
+    right: 10px;
+}
+
+.todo-list li .icon-destroy:after {
+    content: '×';
+}
+
+.todo-list li .icon-edit {
+    position: absolute;
+    top: 0;
+    bottom: -3px;
+    font-size: 19px;
+    right: 45px;
+}
+
+.todo-list li .icon-edit:after {
+    content: '✎';
+}
+
+.todo-list li .icon-pause,
+.todo-list li .icon-play {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+.todo-list li .icon-play {
+    font-size: 15px;
+}
+
+.icon-pause:after {
+    content: '⏸';
+}
+
+.icon-play:after {
+    content: '▶';
+}
+
+.toggle-all {
+    width: 1px;
+    height: 1px;
+    border: none; /* Mobile Safari */
+    opacity: 0;
+    position: absolute;
+    right: 100%;
+    bottom: 100%;
+}
+
+.toggle-all + label {
+    width: 60px;
+    height: 34px;
+    font-size: 0;
+    position: absolute;
+    top: -52px;
+    left: -13px;
+    -webkit-transform: rotate(90deg);
+    transform: rotate(90deg);
+}
+
+.toggle-all + label:before {
+    content: '❯';
+    font-size: 22px;
+    color: #e6e6e6;
+    padding: 10px 27px 10px 27px;
+}
+
+.toggle-all:checked + label:before {
+    color: #737373;
 }
