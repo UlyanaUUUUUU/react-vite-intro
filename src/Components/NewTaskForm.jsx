@@ -1,88 +1,89 @@
 import './NewTaskForm.css';
-import { Component } from 'react';
+import { useState } from 'react';
+import PropTypes from 'prop-types';
 
-export default class NewTaskForm extends Component {
-
-  constructor(props) {
-    super(props);
-    this.state = {
-      label: '',
-      minutes: '',
-      seconds: '',
-    };
-
-
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleKeyDown = this.handleKeyDown.bind(this);
-  }
-
-  handleChange = (e) => {
-    this.setState({
-      [e.target.name]: e.target.value,
-    });
+export default function NewTaskForm({ onCreate }) {
+  NewTaskForm.defaultProps = {
+    onCreate: () => {
+    },
   };
 
-  handleKeyDown(e) {
-    if (e.key === 'Enter') {
-      this.handleSubmit(e);
-    }
-  }
+  NewTaskForm.propTypes = {
+    onCreate: PropTypes.func,
+  };
+  const [label, setLabel] = useState('');
+  const [minutes, setMinutes] = useState('');
+  const [seconds, setSeconds] = useState('');
 
-  handleSubmit(e) {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    switch (name) {
+      case 'label':
+        setLabel(value);
+        break;
+      case 'minutes':
+        setMinutes(value);
+        break;
+      case 'seconds':
+        setSeconds(value);
+        break;
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSubmit(e);
+    }
+  };
+
+  const handleSubmit = (e) => {
     e.preventDefault();
-    const { label, minutes, seconds } = this.state;
 
     if (!label.trim() && !minutes && !seconds) return;
 
     const totalMs = (parseInt(minutes || 0) * 60000 + (parseInt(seconds || 0) * 1000));
-    this.props.onCreate(label, totalMs);
-    this.setState({ label: '', minutes: '', seconds: '' });
-  }
+    onCreate(label, totalMs);
+    setLabel('');
+    setMinutes('');
+    setSeconds('');
+  };
 
-  render() {
-    return (
-      <form
-        className="new-todo-form"
-        onSubmit={this.handleSubmit}
-      >
-        <input
-          className="new-todo"
-          name="label"
-          placeholder="What needs to be done?"
-          type="text"
-          onChange={this.handleChange}
-          onKeyDown={this.handleKeyDown}
-          value={this.state.label}
-          autoFocus
-        />
-        <input
-          className="new-todo-form__timer"
-          name="minutes"
-          placeholder="Min"
-          type="number"
-          min="0"
-          onChange={this.handleChange}
-          onKeyDown={this.handleKeyDown}
-          value={this.state.minutes}
-        />
-        <input
-          className="new-todo-form__timer"
-          name="seconds"
-          placeholder="Sec"
-          type="number"
-          min="0"
-          max="59"
-          onChange={this.handleChange}
-          onKeyDown={this.handleKeyDown}
-          value={this.state.seconds}
-        />
-      </form>
-    );
-  }
+  return (
+    <form
+      className="new-todo-form"
+      onSubmit={handleSubmit}
+    >
+      <input
+        className="new-todo"
+        name="label"
+        placeholder="What needs to be done?"
+        type="text"
+        onChange={handleChange}
+        onKeyDown={handleKeyDown}
+        value={label}
+        autoFocus
+      />
+      <input
+        className="new-todo-form__timer"
+        name="minutes"
+        placeholder="Min"
+        type="number"
+        min="0"
+        onChange={handleChange}
+        onKeyDown={handleKeyDown}
+        value={minutes}
+      />
+      <input
+        className="new-todo-form__timer"
+        name="seconds"
+        placeholder="Sec"
+        type="number"
+        min="0"
+        max="59"
+        onChange={handleChange}
+        onKeyDown={handleKeyDown}
+        value={seconds}
+      />
+    </form>
+  );
 }
-
-NewTaskForm.defaultProps = {
-  onCreate: () => {
-  },
-};
-

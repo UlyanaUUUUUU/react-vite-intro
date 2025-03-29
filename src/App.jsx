@@ -1,61 +1,18 @@
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Header from './Components/Header.jsx';
 import Footer from './Components/Footer.jsx';
 import TaskList from './Components/TaskList.jsx';
 import formatDistanceToNow from 'date-fns/formatDistanceToNow';
-
 import './App.css';
-import { Component } from 'react';
 
+export default function App() {
+  const [items, setItems] = useState([]);
+  const [filter, setFilter] = useState('all');
+  const [timeAgo, setTimeAgo] = useState({});
+  const [activeTimers, setActiveTimers] = useState({});
+  const maxId = useRef(100);
 
-export default class App extends Component {
-  maxId = 100;
-
-  state = {
-    items: [],
-    filter: 'all',
-    timeAgo: {},
-    activeTimers: {},
-  };
-
-
-  componentDidMount() {
-    this.updateTimeAgo();
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.items !== this.state.items) {
-      this.updateTimeAgo();
-    }
-  }
-
-  updateTimeAgo = () => {
-    const { items } = this.state;
-    const timeAgo = {};
-
-    items.forEach((item) => {
-      if (item.toDoDate) {
-        timeAgo[item.id] = formatDistanceToNow(new Date(item.toDoDate));
-      }
-    });
-
-    this.setState({ timeAgo });
-
-    this.timeAgoInterval = setInterval(() => {
-      const updatedTimeAgo = { ...this.state.timeAgo };
-      items.forEach((item) => {
-        if (item.toDoDate) {
-          updatedTimeAgo[item.id] = formatDistanceToNow(new Date(item.toDoDate));
-        }
-      });
-      this.setState({ timeAgo: updatedTimeAgo });
-    }, 60000);
-  };
-
-  componentWillUnmount() {
-    clearInterval(this.timeAgoInterval);
-  }
-
-  toggleProperty = (arr, id, propName) => {
+  const toggleProperty = useCallback((arr, id, propName) => {
     const idx = arr.findIndex((item) => item.id === id);
     const oldItem = arr[idx];
     const value = !oldItem[propName];
@@ -63,54 +20,64 @@ export default class App extends Component {
     const item = { ...arr[idx], [propName]: value };
 
     return [...arr.slice(0, idx), item, ...arr.slice(idx + 1)];
-  };
+  }, []);
 
-  onDelete = (id) => {
-    clearInterval(this.state.activeTimers[id]?.intervalId);
-
-    this.setState((state) => {
-      const idx = state.items.findIndex((item) => item.id === id);
-      const items = [...state.items.slice(0, idx), ...state.items.slice(idx + 1)];
-
-
-      const activeTimers = { ...state.activeTimers };
-      delete activeTimers[id];
-
-      return { items, activeTimers };
+  const updateTimeAgo = useCallback(() => {
+    const newTimeAgo = {};
+    items.forEach((item) => {
+      if (item.toDoDate) {
+        newTimeAgo[item.id] = formatDistanceToNow(new Date(item.toDoDate));
+      }
     });
-  };
+    setTimeAgo(newTimeAgo);
+  }, [items]);
 
-  onEdit = (id, newLabel) => {
-    this.setState((state) => {
-      const idx = state.items.findIndex((item) => item.id === id);
-      const updatedItem = { ...state.items[idx], label: newLabel };
-      const items = [...state.items.slice(0, idx), updatedItem, ...state.items.slice(idx + 1)];
-      return { items };
+  useEffect(() => {
+    updateTimeAgo();
+    const interval = setInterval(updateTimeAgo, 60000);
+    return () => clearInterval(interval);
+  }, [updateTimeAgo]);
+
+  const onDelete = useCallback((id) => {
+    if (activeTimers[id]?.intervalId) {
+      clearInterval(activeTimers[id].intervalId);
+    }
+
+    setItems((prevItems) => prevItems.filter((item) => item.id !== id));
+    setActiveTimers((prevTimers) => {
+      const newTimers = { ...prevTimers };
+      delete newTimers[id];
+      return newTimers;
     });
-  };
+  }, [activeTimers]);
 
-  onCreate = (text, timerDuration = 0) => {
+  const onEdit = useCallback((id, newLabel) => {
+    setItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id ? { ...item, label: newLabel } : item,
+      ),
+    );
+  }, []);
+
+  const onCreate = useCallback((text, timerDuration = 0) => {
     if (!text.trim() && timerDuration <= 0) return;
 
     const newItem = {
-      id: this.maxId++,
+      id: maxId.current++,
       label: text,
       done: false,
       toDoDate: new Date(),
       timerDuration,
     };
 
-    this.setState(({ items }) => ({
-      items: [...items, newItem],
-    }), () => {
-      if (timerDuration > 0) {
-        this.startTimer(newItem.id, timerDuration);
-      }
-    });
-  };
+    setItems((prevItems) => [...prevItems, newItem]);
 
+    if (timerDuration > 0) {
+      startTimer(newItem.id, timerDuration);
+    }
+  }, []);
 
-  startTimer = (id, duration) => {
+  const startTimer = useCallback((id, duration) => {
     const startTime = Date.now();
     const endTime = startTime + duration;
 
@@ -118,39 +85,35 @@ export default class App extends Component {
       const now = Date.now();
       const remainingMs = Math.max(0, endTime - now);
 
-      this.setState(prevState => ({
-        activeTimers: {
-          ...prevState.activeTimers,
-          [id]: {
-            ...prevState.activeTimers[id],
-            remainingMs,
-          },
+      setActiveTimers((prevTimers) => ({
+        ...prevTimers,
+        [id]: {
+          ...prevTimers[id],
+          remainingMs,
         },
       }));
 
       if (remainingMs <= 0) {
-        clearInterval(this.state.activeTimers[id]?.intervalId);
+        clearInterval(activeTimers[id]?.intervalId);
       }
     };
 
     const intervalId = setInterval(updateTimer, 1000);
 
-    this.setState(prevState => ({
-      activeTimers: {
-        ...prevState.activeTimers,
-        [id]: {
-          remainingMs: duration,
-          intervalId,
-          isPaused: false,
-        },
+    setActiveTimers((prevTimers) => ({
+      ...prevTimers,
+      [id]: {
+        remainingMs: duration,
+        intervalId,
+        isPaused: false,
       },
     }));
 
     updateTimer();
-  };
+  }, []);
 
-  toggleTimer = (id) => {
-    const timer = this.state.activeTimers[id];
+  const toggleTimer = useCallback((id) => {
+    const timer = activeTimers[id];
     if (!timer) return;
 
     if (timer.isPaused) {
@@ -159,71 +122,53 @@ export default class App extends Component {
         const now = Date.now();
         const remainingMs = Math.max(0, newEndTime - now);
 
-        this.setState(prevState => ({
-          activeTimers: {
-            ...prevState.activeTimers,
-            [id]: {
-              ...prevState.activeTimers[id],
-              remainingMs,
-            },
+        setActiveTimers((prevTimers) => ({
+          ...prevTimers,
+          [id]: {
+            ...prevTimers[id],
+            remainingMs,
           },
         }));
 
         if (remainingMs <= 0) {
-          clearInterval(this.state.activeTimers[id]?.intervalId);
+          clearInterval(activeTimers[id]?.intervalId);
         }
       };
 
       const intervalId = setInterval(updateTimer, 1000);
 
-      this.setState(prevState => ({
-        activeTimers: {
-          ...prevState.activeTimers,
-          [id]: {
-            remainingMs: timer.remainingMs,
-            intervalId,
-            isPaused: false,
-          },
+      setActiveTimers((prevTimers) => ({
+        ...prevTimers,
+        [id]: {
+          remainingMs: timer.remainingMs,
+          intervalId,
+          isPaused: false,
         },
       }));
 
       updateTimer();
     } else {
       clearInterval(timer.intervalId);
-      this.setState(prevState => ({
-        activeTimers: {
-          ...prevState.activeTimers,
-          [id]: {
-            ...prevState.activeTimers[id],
-            isPaused: true,
-            intervalId: null,
-          },
+      setActiveTimers((prevTimers) => ({
+        ...prevTimers,
+        [id]: {
+          ...prevTimers[id],
+          isPaused: true,
+          intervalId: null,
         },
       }));
     }
-  };
+  }, [activeTimers]);
 
-  formatTime = (ms) => {
-    const minutes = Math.floor(ms / 60000);
-    const seconds = Math.floor((ms % 60000) / 1000);
-    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  };
+  const clearCompleted = useCallback(() => {
+    setItems((prevItems) => prevItems.filter((item) => !item.done));
+  }, []);
 
-  clearCompleted = () => {
-    this.setState((state) => {
-      const items = state.items.filter((item) => !item.done);
-      return { items };
-    });
-  };
+  const onToggleDone = useCallback((id) => {
+    setItems((prevItems) => toggleProperty(prevItems, id, 'done'));
+  }, [toggleProperty]);
 
-  onToggleDone = (id) => {
-    this.setState((state) => {
-      const items = this.toggleProperty(state.items, id, 'done');
-      return { items };
-    });
-  };
-
-  filter(items, filter) {
+  const filterItems = useCallback((items, filter) => {
     switch (filter) {
       case 'all':
         return items;
@@ -234,41 +179,32 @@ export default class App extends Component {
       default:
         return items;
     }
-  }
+  }, []);
 
-  onFilterChange = (filter) => {
-    this.setState({ filter });
-  };
+  const visibleItems = filterItems(items, filter);
+  const doneCount = items.filter((item) => item.done).length;
+  const toDoCount = items.length - doneCount;
 
-
-  render() {
-    const { items, filter, timeAgo } = this.state;
-    const visibleItems = this.filter(items, filter);
-    const doneCount = items.filter((item) => item.done).length;
-    const toDoCount = items.length - doneCount;
-
-
-    return (
-      <section className="todoapp">
-        <Header onCreate={this.onCreate} />
-        <section className="main">
-          <TaskList
-            onDelete={this.onDelete}
-            onToggleDone={this.onToggleDone}
-            items={visibleItems}
-            onEdit={this.onEdit}
-            timeAgo={timeAgo}
-            activeTimers={this.state.activeTimers}
-            onToggleTimer={this.toggleTimer}
-          ></TaskList>
-          <Footer
-            toDo={toDoCount}
-            filter={filter}
-            onFilterChange={this.onFilterChange}
-            clearCompleted={this.clearCompleted}
-          ></Footer>
-        </section>
+  return (
+    <section className="todoapp">
+      <Header onCreate={onCreate} />
+      <section className="main">
+        <TaskList
+          onDelete={onDelete}
+          onToggleDone={onToggleDone}
+          items={visibleItems}
+          onEdit={onEdit}
+          timeAgo={timeAgo}
+          activeTimers={activeTimers}
+          onToggleTimer={toggleTimer}
+        />
+        <Footer
+          toDo={toDoCount}
+          filter={filter}
+          onFilterChange={setFilter}
+          clearCompleted={clearCompleted}
+        />
       </section>
-    );
-  }
+    </section>
+  );
 }
